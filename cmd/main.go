@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/raikerian/go-macos-virtualization/pkg/macos"
+	"github.com/raikerian/go-macos-virtualization/pkg/utils"
 )
 
 var install bool
@@ -15,8 +16,8 @@ var memorySize uint64
 
 func init() {
 	flag.BoolVar(&install, "install", false, "run command as install mode")
-	flag.UintVar(&cpuCount, "cpu", 4, "number of cpu cores")
-	flag.Uint64Var(&memorySize, "memory", 16, "memory size in GB")
+	flag.UintVar(&cpuCount, "cpu", utils.ComputeCPUCount(), "number of cpu cores")
+	flag.Uint64Var(&memorySize, "memory", utils.ComputeMemorySize(), "memory size, must be a multiple of a 1 megabyte (1024 * 1024 bytes)")
 }
 
 func main() {

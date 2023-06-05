@@ -16,7 +16,6 @@ type Manager struct {
 }
 
 func NewManager(cpuCount uint, memorySize uint64) (*Manager, error) {
-	// prepare configuration
 	platformConfig, err := utils.SetupMacPlatformConfiguration()
 	if err != nil {
 		return nil, err
@@ -49,7 +48,7 @@ func (m *Manager) Run(ctx context.Context) error {
 			select {
 			case newState := <-m.vm.StateChangedNotify():
 				if newState == vz.VirtualMachineStateRunning {
-					log.Println("start VM is running")
+					log.Println("VM is running")
 				}
 				if newState == vz.VirtualMachineStateStopped || newState == vz.VirtualMachineStateStopping {
 					log.Println("stopped state")
