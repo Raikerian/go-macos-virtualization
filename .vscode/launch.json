@@ -2,13 +2,38 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug",
+            "name": "List NICs",
             "type": "go",
             "request": "launch",
             "mode": "exec",
             "program": "${workspaceFolder}/cmd/__debug_bin",
             "args": [
-                "-install", "true"
+                "netif",
+            ],
+            "preLaunchTask": "codesign",
+            "postDebugTask": "cleanup",
+        },
+        {
+            "name": "Install macOS",
+            "type": "go",
+            "request": "launch",
+            "mode": "exec",
+            "program": "${workspaceFolder}/cmd/__debug_bin",
+            "args": [
+                "install",
+            ],
+            "preLaunchTask": "codesign",
+            "postDebugTask": "cleanup",
+        },
+        {
+            "name": "Run macOS",
+            "type": "go",
+            "request": "launch",
+            "mode": "exec",
+            "program": "${workspaceFolder}/cmd/__debug_bin",
+            "args": [
+                "run",
+                "--test",
             ],
             "preLaunchTask": "codesign",
             "postDebugTask": "cleanup",

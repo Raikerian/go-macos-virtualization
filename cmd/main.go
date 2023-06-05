@@ -1,42 +1,38 @@
 package main
 
 import (
-	"context"
-	"flag"
 	"fmt"
 	"os"
 
-	"github.com/raikerian/go-macos-virtualization/pkg/macos"
-	"github.com/raikerian/go-macos-virtualization/pkg/utils"
+	"github.com/raikerian/go-macos-virtualization/pkg/commands"
 )
 
-var install bool
-var cpuCount uint
-var memorySize uint64
-
-func init() {
-	flag.BoolVar(&install, "install", false, "run command as install mode")
-	flag.UintVar(&cpuCount, "cpu", utils.ComputeCPUCount(), "number of cpu cores")
-	flag.Uint64Var(&memorySize, "memory", utils.ComputeMemorySize(), "memory size, must be a multiple of a 1 megabyte (1024 * 1024 bytes)")
-}
+var (
+	cmds = []commands.Command{
+		commands.NewNetifCommand(),
+		commands.NewInstallCommand(),
+		commands.NewRunCommand(),
+	}
+)
 
 func main() {
-	flag.Parse()
-	if err := run(context.Background()); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to run: %v", err)
+	if err := run(os.Args[1:]); err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context) error {
-	if install {
-		return macos.Install(ctx)
+func run(args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("you must pass a sub-command")
 	}
 
-	m, err := macos.NewManager(cpuCount, memorySize)
-	if err != nil {
-		return err
+	subcommand := os.Args[1]
+	for _, cmd := range cmds {
+		if cmd.Name() == subcommand {
+			return cmd.Run(os.Args[2:])
+		}
 	}
 
-	return m.Run(ctx)
+	return fmt.Errorf("unknown subcommand: %s, use `%s help` to get list of all available commands", subcommand, os.Args[0])
 }

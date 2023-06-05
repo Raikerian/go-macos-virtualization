@@ -229,6 +229,15 @@ func CreateNetworkDeviceConfiguration() (*vz.VirtioNetworkDeviceConfiguration, e
 	return vz.NewVirtioNetworkDeviceConfiguration(natAttachment)
 }
 
+func CreateBridgedNetworkDeviceConfiguration(networkInterface vz.BridgedNetwork) (*vz.VirtioNetworkDeviceConfiguration, error) {
+	bridgedAttachment, err := vz.NewBridgedNetworkDeviceAttachment(networkInterface)
+	if err != nil {
+		return nil, err
+	}
+
+	return vz.NewVirtioNetworkDeviceConfiguration(bridgedAttachment)
+}
+
 func CreateKeyboardConfiguration() (*vz.USBKeyboardConfiguration, error) {
 	return vz.NewUSBKeyboardConfiguration()
 }
