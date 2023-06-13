@@ -97,7 +97,7 @@ func CreateMacPlatformConfiguration(macOSConfiguration *vz.MacOSConfigurationReq
 	)
 }
 
-func CreateVMConfiguration(platformConfig vz.PlatformConfiguration, cpuCount uint, memorySize uint64) (*vz.VirtualMachineConfiguration, error) {
+func CreateVMConfiguration(platformConfig vz.PlatformConfiguration, cpuCount uint, memorySize uint64, networkInterfaceIdentifier string) (*vz.VirtualMachineConfiguration, error) {
 	// verify cpu count
 	if cpuCount > vz.VirtualMachineConfigurationMaximumAllowedCPUCount() {
 		return nil, fmt.Errorf("cpu count is too large: %d", cpuCount)
@@ -141,7 +141,20 @@ func CreateVMConfiguration(platformConfig vz.PlatformConfiguration, cpuCount uin
 	}
 	config.SetStorageDevicesVirtualMachineConfiguration([]vz.StorageDeviceConfiguration{blockDeviceConfig})
 
-	networkDeviceConfig, err := CreateNetworkDeviceConfiguration()
+	var networkInterface vz.BridgedNetwork
+	if networkInterfaceIdentifier != "" {
+		networkInterfaces := vz.NetworkInterfaces()
+		for _, b := range networkInterfaces {
+			if b.Identifier() == networkInterfaceIdentifier {
+				networkInterface = b
+				break
+			}
+		}
+		if networkInterface == nil {
+			return nil, fmt.Errorf("network interface %s not found", networkInterfaceIdentifier)
+		}
+	}
+	networkDeviceConfig, err := CreateNetworkDeviceConfiguration(networkInterface)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create network device configuration: %w", err)
 	}
@@ -221,21 +234,22 @@ func CreateBlockDeviceConfiguration(diskPath string) (*vz.VirtioBlockDeviceConfi
 	return vz.NewVirtioBlockDeviceConfiguration(diskImageAttachment)
 }
 
-func CreateNetworkDeviceConfiguration() (*vz.VirtioNetworkDeviceConfiguration, error) {
-	natAttachment, err := vz.NewNATNetworkDeviceAttachment()
-	if err != nil {
-		return nil, err
+func CreateNetworkDeviceConfiguration(networkInterface vz.BridgedNetwork) (*vz.VirtioNetworkDeviceConfiguration, error) {
+	var attachment vz.NetworkDeviceAttachment
+	var err error
+	if networkInterface != nil {
+		attachment, err = vz.NewBridgedNetworkDeviceAttachment(networkInterface)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		attachment, err = vz.NewNATNetworkDeviceAttachment()
+		if err != nil {
+			return nil, err
+		}
 	}
-	return vz.NewVirtioNetworkDeviceConfiguration(natAttachment)
-}
 
-func CreateBridgedNetworkDeviceConfiguration(networkInterface vz.BridgedNetwork) (*vz.VirtioNetworkDeviceConfiguration, error) {
-	bridgedAttachment, err := vz.NewBridgedNetworkDeviceAttachment(networkInterface)
-	if err != nil {
-		return nil, err
-	}
-
-	return vz.NewVirtioNetworkDeviceConfiguration(bridgedAttachment)
+	return vz.NewVirtioNetworkDeviceConfiguration(attachment)
 }
 
 func CreateKeyboardConfiguration() (*vz.USBKeyboardConfiguration, error) {

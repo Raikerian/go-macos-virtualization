@@ -118,5 +118,5 @@ func setupVirtualMachineWithMacOSConfigurationRequirements(macOSConfiguration *v
 		return nil, fmt.Errorf("failed to create mac platform config: %w", err)
 	}
 	// we utilize a full power for installer to make it smooth
-	return utils.CreateVMConfiguration(platformConfig, utils.ComputeCPUCount(), utils.ComputeMemorySize())
+	return utils.CreateVMConfiguration(platformConfig, utils.ComputeCPUCount(), utils.ComputeMemorySize(), "")
 }

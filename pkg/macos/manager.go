@@ -15,12 +15,12 @@ type Manager struct {
 	vm *vz.VirtualMachine
 }
 
-func NewManager(cpuCount uint, memorySize uint64) (*Manager, error) {
+func NewManager(cpuCount uint, memorySize uint64, networkInterface string) (*Manager, error) {
 	platformConfig, err := utils.SetupMacPlatformConfiguration()
 	if err != nil {
 		return nil, err
 	}
-	config, err := utils.CreateVMConfiguration(platformConfig, cpuCount, memorySize)
+	config, err := utils.CreateVMConfiguration(platformConfig, cpuCount, memorySize, networkInterface)
 	if err != nil {
 		return nil, err
 	}

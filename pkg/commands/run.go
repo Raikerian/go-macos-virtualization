@@ -14,8 +14,9 @@ const runCommandName = "run"
 type Run struct {
 	*flag.FlagSet
 
-	cpuCount   uint
-	memorySize uint64
+	cpuCount         uint
+	memorySize       uint64
+	networkInterface string
 }
 
 func NewRunCommand() *Run {
@@ -25,6 +26,7 @@ func NewRunCommand() *Run {
 
 	c.UintVar(&c.cpuCount, "cpu", utils.ComputeCPUCount(), "number of cpu cores")
 	c.Uint64Var(&c.memorySize, "memory", utils.ComputeMemorySize(), "memory size, must be a multiple of a 1 megabyte (1024 * 1024 bytes)")
+	c.StringVar(&c.networkInterface, "nic", "", "bridge network interface with identifier, use `netif` subcommand to get list of all available network interfaces")
 	return c
 }
 
@@ -38,7 +40,7 @@ func (c *Run) Run(args []string) error {
 	fmt.Println("Running VM...")
 
 	ctx := context.Background()
-	m, err := macos.NewManager(c.cpuCount, c.memorySize)
+	m, err := macos.NewManager(c.cpuCount, c.memorySize, c.networkInterface)
 	if err != nil {
 		return err
 	}
